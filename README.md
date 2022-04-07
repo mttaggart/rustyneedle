@@ -1,5 +1,7 @@
 # RustyNeedle
 
+**THIS CODE IS FOR EDUCATIONAL PURPOSES ONLY. I take no responsibility if you decide to do crimes with this code.**
+
 A simple dropper for shellcode that leverages the power of...base64 encoding??
 
 No seriously. And it works. Here's how:
