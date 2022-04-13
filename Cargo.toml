@@ -9,6 +9,7 @@ edition = "2021"
 tokio = { version = "1", features = ["full"] }
 reqwest = "0.11"
 base64 = "0.13.0"
+litcrypt = "0.3"
 windows = { version = "0.35.0", features = [
     "Win32_Foundation",
     "Win32_Security",
