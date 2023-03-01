@@ -10,11 +10,8 @@ OUT_FILE = sys.argv[3]
 with open(IN_FILE, "rb") as f:
     shellcode = f.read()
 
-# Hex encode the raw shellcode
-shellcode_hex = ",".join(list(map(hex, shellcode)))
-
 # B64 Encode the shellcode
-encoded_shellcode = shellcode_hex.encode()
+encoded_shellcode = shellcode.encode()
 
 for i in range(B64_ITERS):
     encoded_shellcode = b64encode(encoded_shellcode)
