@@ -15,7 +15,8 @@ use windows::{
         Foundation::{
             CloseHandle,
             GetLastError,
-            HANDLE
+            HANDLE,
+            WIN32_ERROR
         },
         System::{
             Memory::{
@@ -29,11 +30,11 @@ use windows::{
             },
             WindowsProgramming::INFINITE,
             Threading::{
-                OpenProcess,
+                // OpenProcess,
                 CreateRemoteThread,
-                GetCurrentProcessId,
+                // GetCurrentProcessId,
                 GetCurrentProcess,
-                PROCESS_ALL_ACCESS,
+                // PROCESS_ALL_ACCESS,
                 WaitForSingleObject
             }
         },
@@ -141,13 +142,13 @@ async fn main() {
             CloseHandle(h);
 
             
-            // if WaitForSingleObject(h_thread, INFINITE) == windows::Win32::Foundation::WIN32_ERROR(0) {
-            //    println!("{}", lc!("Good!"));
-            //    println!("{}", lc!("Injection completed!"));
-            // } else {
-            //    let error = GetLastError();
-            //    println!("{:?}", error);
-            // }
+            if WaitForSingleObject(h_thread, INFINITE) == WIN32_ERROR(0) {
+               println!("{}", lc!("Good!"));
+               println!("{}", lc!("Injection completed!"));
+            } else {
+               let error = GetLastError();
+               println!("{:?}", error);
+            }
         },
         Err(e) => {
             println!("{e}")
