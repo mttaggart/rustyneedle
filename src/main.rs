@@ -111,6 +111,7 @@ async fn main() {
             println!("Writing memory...");
             let mut n = 0;
             WriteProcessMemory(h, addr, sc.as_ptr() as  _, sc.len(), Some(&mut n));
+            println!("Wrote {n} bytes");
 
             println!("Changing mem permissions to RX");
             let mut old_protect: PAGE_PROTECTION_FLAGS = PAGE_READWRITE;
