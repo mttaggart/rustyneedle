@@ -22,9 +22,9 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 
 [[package]]
 name = "bolus"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a303165412b3cb2085eb27c2d2e70e7e20607c44780160d4a5735c14a08e7832"
+checksum = "4ed6dabe7c2d77502aaf8c0580e518b69cc14c39ec912ae44de172d3888579c2"
 dependencies = [
  "base64",
  "bytes",

