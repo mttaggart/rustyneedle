@@ -1,3 +1,5 @@
+# THIS REPO HAS BEEN ARCHIVED AND MOVED TO [CODEBERG](https://codeberg.org/mttaggart/rustyneedle)
+
 # RustyNeedle
 
 **THIS CODE IS FOR EDUCATIONAL PURPOSES ONLY. I take no responsibility if you decide to do crimes with this code.**
